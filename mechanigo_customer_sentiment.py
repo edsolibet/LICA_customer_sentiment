@@ -36,7 +36,6 @@ from parsel import Selector
 # import natural language processing module and tools
 import nltk
 from nltk.corpus.reader.reviews import Review
-from textblob import TextBlob
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
 from nltk.stem import WordNetLemmatizer
