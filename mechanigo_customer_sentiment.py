@@ -4,7 +4,8 @@ import sys
 import subprocess
 import pkg_resources
 
-required = {'pandas', 'numpy', 'selenium', 'datetime', 'seaborn', 'adjustText', 'streamlit-aggrid'}
+required = {'pandas', 'numpy', 'selenium', 'datetime', 'seaborn', 
+            'adjustText', 'parsel', 'streamlit-aggrid'}
 installed = {pkg.key for pkg in pkg_resources.working_set}
 missing = required - installed
 
