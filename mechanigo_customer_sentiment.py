@@ -4,7 +4,7 @@ import sys
 import subprocess
 import pkg_resources
 
-required = {'pandas', 'numpy', 'selenium', 'datetime', 'seaborn', 'streamlit-aggrid'}
+required = {'pandas', 'numpy', 'selenium', 'datetime', 'seaborn', 'adjustText', 'streamlit-aggrid'}
 installed = {pkg.key for pkg in pkg_resources.working_set}
 missing = required - installed
 
@@ -87,7 +87,7 @@ def extract_text(s):
     #text = cleanup(raw)
     return raw
 
-def get_google_reviews(driver, names):
+def get_google_reviews(_driver, names):
 
     def get_elems(response):
         a = [elem.get() for elem in response.xpath("//tbody/tr[@class]") if 'MechaniGO.ph' in elem.get()]
@@ -96,12 +96,12 @@ def get_google_reviews(driver, names):
     google_reviews = []
     authors = []
     for name in names:
-        driver.get('https://pleper.com/index.php?do=tools&sdo=analyze_google_reviewer')
-        driver.find_element(By.NAME, 'url').send_keys(name[0])
-        WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, '//input[@value="Analyze Google Reviews"]'))).click()
+        _driver.get('https://pleper.com/index.php?do=tools&sdo=analyze_google_reviewer')
+        _driver.find_element(By.NAME, 'url').send_keys(name[0])
+        WebDriverWait(_driver, 5).until(EC.element_to_be_clickable((By.XPATH, '//input[@value="Analyze Google Reviews"]'))).click()
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.XPATH, '//tbody[@role="alert"]')))
-            google_reviews.append((get_elems(Selector(driver.page_source))))
+            WebDriverWait(_driver, 5).until(EC.presence_of_all_elements_located((By.XPATH, '//tbody[@role="alert"]')))
+            google_reviews.append((get_elems(Selector(_driver.page_source))))
             authors.append(name[1])
             #print ('name: {}'.format(name[1]))
         except:
@@ -114,16 +114,16 @@ def get_google_reviews(driver, names):
     a.loc[:, 'platform'] = ['google']*len(authors)
     return a[['date', 'author', 'raw', 'platform']]
 
-def extract_google_reviews(driver, query):
-    driver.get('https://google.com/?hl=en')
-    driver.find_element_by_name('q').send_keys(query)
+def extract_google_reviews(_driver, query):
+    _driver.get('https://google.com/?hl=en')
+    _driver.find_element_by_name('q').send_keys(query)
     WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.NAME, 'btnK'))).click()
 
     '''
     Locate google review link and extract total number of reviews
     Click link
     '''
-    reviews_header = driver.find_element_by_css_selector('div.kp-header')
+    reviews_header = _driver.find_element_by_css_selector('div.kp-header')
     reviews_link = reviews_header.find_element_by_partial_link_text('Google reviews')
     number_of_reviews = int(reviews_link.text.split()[0])
     reviews_link.click()
@@ -131,17 +131,17 @@ def extract_google_reviews(driver, query):
     '''
     Load all reviews and get page source
     '''
-    all_reviews = WebDriverWait(driver, 3).until(EC.presence_of_all_elements_located((By.XPATH, '//span[@jscontroller="MZnM8e"]')))
+    all_reviews = WebDriverWait(_driver, 3).until(EC.presence_of_all_elements_located((By.XPATH, '//span[@jscontroller="MZnM8e"]')))
     while len(all_reviews) < number_of_reviews:
-            driver.execute_script('arguments[0].scrollIntoView(true);', all_reviews[-1])
-            all_reviews = driver.find_elements(By.XPATH, '//span[@jscontroller="MZnM8e"]')
-    page_content = driver.page_source
+            _driver.execute_script('arguments[0].scrollIntoView(true);', all_reviews[-1])
+            all_reviews = _driver.find_elements(By.XPATH, '//span[@jscontroller="MZnM8e"]')
+    page_content = _driver.page_source
     response = Selector(page_content)
 
     names = [[name.get().split('"')[1].split("?hl")[0], name.get().split(">")[1].split("<")[0]]
              for name in response.xpath('//div[@class="TSUbDb"]/a[contains(@href, "https://www.google.com/maps/contrib/")]')]
     
-    return get_google_reviews(driver, names)
+    return get_google_reviews(_driver, names)
 
 def extract_fb_reviews(csv_url):
     df_fb = pd.read_csv(csv_url)
